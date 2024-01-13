@@ -212,6 +212,10 @@ export async function weaponBuilder({
   ap,
   shots,
 }) {
+  weaponName = weaponName.replace(' or ', '');
+  weaponName = weaponName.replace(' two ', '');
+  weaponName = weaponName.replace(' three ', '');
+
   const dmg = weaponDamage
     ?.replace(
       new RegExp(

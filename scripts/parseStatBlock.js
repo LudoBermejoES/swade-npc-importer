@@ -68,8 +68,8 @@ function GetSectionsIndex(inData) {
     `${game.i18n.localize('npcImporter.parser.Toughness')}:`,
     `${game.i18n.localize('npcImporter.parser.PowerPoints')}:`,
     `${game.i18n.localize('npcImporter.parser.Gear')}:`,
-    `${game.i18n.localize('npcImporter.parser.SpecialAbilities')}:`,
-    `${game.i18n.localize('npcImporter.parser.SuperPowers')}:`,
+    `${game.i18n.localize('npcImporter.parser.SpecialAbilities')}\n`,
+    `${game.i18n.localize('npcImporter.parser.SuperPowers')}\n`,
     `${game.i18n.localize('npcImporter.parser.Conviction')}:`,
   ];
 
@@ -306,8 +306,8 @@ function stringsToArray(line) {
 
 function getBulletListStats(sections) {
   const supportedBulletListStats = [
-    `${game.i18n.localize('npcImporter.parser.SpecialAbilities')}:`,
-    `${game.i18n.localize('npcImporter.parser.SuperPowers')}:`,
+    `${game.i18n.localize('npcImporter.parser.SpecialAbilities')}\n`,
+    `${game.i18n.localize('npcImporter.parser.SuperPowers')}\n`,
   ];
 
   var retrievedBulletListStats = {};
@@ -320,7 +320,7 @@ function getBulletListStats(sections) {
       retrievedBulletListStats.SpecialAbilities = getAbilities(
         line
           .replace(
-            `${game.i18n.localize('npcImporter.parser.SpecialAbilities')}:`,
+            `${game.i18n.localize('npcImporter.parser.SpecialAbilities')}\n`,
             ''
           )
           .trim()
@@ -331,7 +331,7 @@ function getBulletListStats(sections) {
     ) {
       retrievedBulletListStats.SuperPowers = getAbilities(
         line
-          .replace(`${game.i18n.localize('npcImporter.parser.SuperPowers')}:`)
+          .replace(`${game.i18n.localize('npcImporter.parser.SuperPowers')}\n`)
           .trim()
       );
     }
@@ -351,10 +351,9 @@ function getAbilities(data) {
       new RegExp(getModuleSettings(global.settingBulletPointIcons), 'ig')
     );
   } else {
-    line = splitAndTrim(data, new RegExp('@', 'gi'));
+    line = splitAndTrim(data, new RegExp('\n', 'gi'));
   }
 
-  line.shift();
   line.forEach(element => {
     let ability = element.split(':');
     let abilityName = !modifiedSpecialAbs

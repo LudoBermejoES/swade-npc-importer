@@ -19,6 +19,7 @@ import {
   settingallAsSpecialAbilities,
   twoHandsNotaiton,
   settingNumberOfBennies,
+  settingSeparatorForMultipleCharacters
 } from '../global.js';
 import SelectCompendiums from './selectCompendiums.js';
 import TokenSettings from './tokenSettings.js';

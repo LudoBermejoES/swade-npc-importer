@@ -15,6 +15,14 @@ import {
   getAllActiveCompendiums,
 } from './utils/foundryActions.js';
 
+import {
+  Update
+} from './utils/foundryActions.js'
+
+import {
+  prepareActorForUpdate
+} from './actorBuilder.js'
+
 Hooks.on('ready', async () => {
   if (game.users.get(game.userId).can('ACTOR_CREATE') == true) {
     log('Setting up settings...');
@@ -30,12 +38,19 @@ Hooks.on('ready', async () => {
 Hooks.on('renderActorDirectory', async (app, html, data) => {
   if (game.users.get(game.userId).can('ACTOR_CREATE') == true) {
     const npcImporterButton = $(
-      `<button style="width: calc(100% - 8px);"><i class="fas fa-align-left"></i>${game.i18n.localize(
+      `<button id="StatBlockImporterButton" style="width: calc(100% - 8px);"><i class="fas fa-align-left"></i>${game.i18n.localize(
         'npcImporter.HTML.StatBlockImporterTitle'
+      )}</button>`
+    );
+    const npcImporterUpdateButton = $(
+      `<button id="StatBlockUpdaterButton" style="width: calc(100% - 8px);"><i class="fas fa-align-left"></i>${game.i18n.localize(
+        'npcImporter.HTML.StatBlockUpdaterTitle'
       )}</button>`
     );
 
     html.find('.directory-footer').append(npcImporterButton);
+    html.find('.directory-footer').append(npcImporterUpdateButton);
+    npcImporterUpdateButton.on('click', importForAllSelectedTokens);
 
     npcImporterButton.on('click', () => {
       new Dialog({
@@ -78,7 +93,63 @@ Hooks.on('renderActorDirectory', async (app, html, data) => {
       }).render(true);
     });
   }
+
 });
+
+function askForSettings() {
+  return new Promise((resolve, reject) => {
+    new Dialog({
+      title: game.i18n.localize('npcImporter.HTML.ImportTitle'),
+      content: importerDialogue(),
+      buttons: {
+        Import: {
+          label: game.i18n.localize('npcImporter.HTML.Import'),
+          callback: html => {
+            let radios = document.querySelectorAll(
+              'input[type="radio"]:checked'
+            );
+            let importSettings = {
+              actorType: radios[0].value,
+              isWildCard: radios[1].value,
+              tokenSettings: {
+                disposition: parseInt(radios[2].value),
+                vision: document.getElementsByName('vision')[0].checked,
+                visionRange:
+                  parseInt(
+                    document.getElementsByName('visionRange')[0].value
+                  ) || 0,
+                visionAngle: parseInt(
+                  document.getElementsByName('visionAngle')[0].value || 360
+                ),
+              },
+              saveFolder: html.find('select[name="save-folder"]')[0].value,
+            };
+            resolve(importSettings)
+          },
+        },
+        Cancel: {
+          label: 'Cancel',
+        },
+      },
+      Default: 'Import!',
+    }).render(true);
+  });
+  
+}
+
+async function importForAllSelectedTokens() {
+  const importSettings = await askForSettings();
+  const promises = canvas?.tokens?.controlled.map(async(token) => {
+      const actorId = token.document.actorId;
+      const actor = game.actors.get(actorId);
+      const actorData = await prepareActorForUpdate(importSettings, document.getElementById('statBlock').value, actor);
+      return actorData;
+  })
+
+  const actorsToUpdate = await Promise.all(promises);
+  Update(actorsToUpdate)
+}
+
 
 function importerDialogue() {
   let defaultData = {

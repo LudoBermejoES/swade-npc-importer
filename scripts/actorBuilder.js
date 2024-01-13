@@ -15,7 +15,7 @@ import {
 } from './utils/foundryActions.js';
 import { getBonus } from './utils/parserBuilderHelpers.js';
 
-export async function buildActor(importSettings, data) {
+export async function buildActor(importSettings, data, updateExistingActors) {
   let clipboardText = data ? data : await getClipboardText();
   if (clipboardText) {
     await setAllPacks();
@@ -25,8 +25,14 @@ export async function buildActor(importSettings, data) {
 
     try {
       const parsedData = await statBlockParser(clipboardText);
-      const finalActor = await generateActorData(parsedData, importSettings);
-      await actorImporter(finalActor);
+      const multipleNames = parsedData.Name.split('|');
+      multipleNames.forEach(async(name) => {
+        const finalActor = await generateActorData({
+          ...parsedData,
+          Name: name
+        }, importSettings);
+        await actorImporter(finalActor, updateExistingActors);
+      })
     } catch (error) {
       log('Failed to build finalActor: ' + error);
     } finally {
@@ -37,6 +43,35 @@ export async function buildActor(importSettings, data) {
     ui.notification.error(
       game.i18n.localize('npcImporter.parser.EmptyClipboard')
     );
+  }
+}
+
+export async function prepareActorForUpdate(importSettings, data, originalActor) {
+  let clipboardText = data ? data : await getClipboardText();
+  if (clipboardText) {
+    await setAllPacks();
+    const currentLang = game.i18n.lang;
+    await setParsingLanguage(getModuleSettings(settingParaeLanguage));
+    await updateModuleSetting(settingLastSaveFolder, importSettings.saveFolder);
+
+    let finalActor;
+    try {
+      const parsedData = await statBlockParser(clipboardText);
+      finalActor = await generateActorData(parsedData, importSettings);
+      finalActor.name = originalActor.name;
+      finalActor._id = originalActor._id;
+      if(originalActor.img) finalActor.img = originalActor.img;
+      if(originalActor.token?.texture) finalActor.prototypeToken.texture = originalActor.token.texture;
+      if(originalActor.folder) finalActor.prototypeToken.folder = originalActor.token.folder;
+    } catch (error) {
+      log('Failed to build finalActor: ' + error);
+    } finally {
+      await setParsingLanguage(currentLang);
+      resetAllPacks();
+      
+
+      return finalActor;
+    }
   }
 }
 

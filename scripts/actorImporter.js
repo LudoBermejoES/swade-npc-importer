@@ -1,16 +1,17 @@
 import { log } from './global.js';
-import { Import, GetActorId, DeleteActor } from './utils/foundryActions.js';
+import { Import, GetActorId, DeleteActor, GetActorData } from './utils/foundryActions.js';
 
 export async function actorImporter(actorDataToImport) {
   let actorId = GetActorId(actorDataToImport.name);
+  let actorData = GetActorData(actorDataToImport.name)
   if (!actorId) {
     await Import(actorDataToImport);
   } else {
-    await whatToDo(actorDataToImport, actorId);
+    await whatToDo(actorDataToImport, actorId, actorData);
   }
 }
 
-async function whatToDo(actorData, actorId) {
+async function whatToDo(actorData, actorId, actorOriginalData) {
   let actorExists = `
     ${game.i18n.localize('npcImporter.HTML.ActorExistText')}
     <div class="form-group-dialog newName" >
@@ -41,6 +42,8 @@ async function whatToDo(actorData, actorId) {
         label: game.i18n.localize('npcImporter.HTML.Override'),
         callback: async () => {
           log('Overriding existing Actor');
+          if(actorOriginalData.img) actorData.img = actorOriginalData.img;
+          if(actorOriginalData.token?.texture) actorData.prototypeToken.texture = actorOriginalData.token.texture;
           await DeleteActor(actorId);
           await Import(actorData);
         },

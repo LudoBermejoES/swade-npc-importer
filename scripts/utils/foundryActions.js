@@ -165,6 +165,28 @@ export async function Import(actorData) {
   }
 }
 
+export async function Update(actorArray) {
+  //Throw a hook with the actorData before creation:
+  Hooks.call('npcImporter-preUpdateActors', actorArray);
+  try {
+    const actors = await Actor.updateDocuments(actorArray);
+    actorArray.forEach(actorData => {
+      ui.notifications.info(
+        game.i18n.format('npcImporter.HTML.ActorCreated', {
+          actorName: actorData.name,
+        })
+      );
+    })
+    //Throw a hook containing the actors:
+    Hooks.call('npcImporter-ActorsUpdated', actors);
+  } catch (error) {
+    log(`Failed to import: ${error}`);
+    ui.notifications.error(
+      game.i18n.localize('npcImporter.HTML.FailedToImport')
+    );
+  }
+}
+
 export function GetActorId(actorName) {
   try {
     return game.actors.getName(actorName).id;
