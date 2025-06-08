@@ -35,7 +35,7 @@ Hooks.on('renderActorDirectory', async (app, html, data) => {
       )}</button>`
     );
 
-    html.find('.directory-footer').append(npcImporterButton);
+    $(html).find('.directory-footer').append(npcImporterButton);
 
     npcImporterButton.on('click', () => {
       new Dialog({
@@ -62,7 +62,7 @@ Hooks.on('renderActorDirectory', async (app, html, data) => {
                     document.getElementsByName('visionAngle')[0].value || 360
                   ),
                 },
-                saveFolder: html.find('select[name="save-folder"]')[0].value,
+                saveFolder: $(html).find('select[name="save-folder"]')[0].value,
               };
               buildActor(
                 importSettings,
@@ -177,25 +177,23 @@ function importerDialogue() {
             </div>
         </div>
         <div class="form-group slim">
-          <p>${game.i18n.localize('TOKEN.VisionEnabled')}</p>
+          <p>${game.i18n.localize('TOKEN.FIELDS.sight.enabled.label')}</p>
           <input type="checkbox" id="vision" name="vision" value="vision" ${
             defaultData.tokenData.vision == true ? 'checked' : ''
           }/>
         </div>
         <div class="form-group slim">
-          <p>${game.i18n.localize('TOKEN.VisionRange')}</p>
+          <p>${game.i18n.localize('TOKEN.FIELDS.sight.range.label')}</p>
           <input type="number" step="1" name="visionRange" value="${
             defaultData.tokenData.visionRange
           }" />
         </div>
         <div class="form-group slim">
-          <p>${game.i18n.localize('TOKEN.VisionAngle')}</p>
+          <p>${game.i18n.localize('TOKEN.FIELDS.sight.angle.label')}</p>
             <input type="number" name="visionAngle" step="1" max="360" value="${
               defaultData.tokenData.visionAngle
             }" />
           </div>
-        </div>
-        <br>
         <div class="form-group slim">
           <label>${game.i18n.localize(
             'npcImporter.HTML.SaveFolder'
