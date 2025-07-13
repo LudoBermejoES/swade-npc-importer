@@ -1,2 +1,2 @@
-#!/bin/sh
-npx pretty-quick --staged
+npx lint-staged
+node bin/check-version-bump.cjs

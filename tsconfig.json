@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
-    "types": ["@league-of-foundry-developers/foundry-vtt-types"],
-    "moduleResolution": "node",
-    "strictNullChecks": true,
-    "target": "es2016",
-    "module": "commonjs",
+    "types": ["@types/fvtt-types", "vitest/globals"],
+    "baseUrl": ".",
+    "outDir": "dist",
+    "moduleResolution": "bundler",
+    "target": "esnext",
+    "module": "esnext",
     "resolveJsonModule": true,
-    "allowJs": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*", "rollup.config.ts"],
+  "exclude": ["bin"]
 }

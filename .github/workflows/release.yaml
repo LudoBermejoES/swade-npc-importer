@@ -1,0 +1,32 @@
+name: Mod Builder
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: yarn
+          cache-dependency-path: yarn.lock
+      - run: yarn --frozen-lockfile
+      - run: yarn build
+      - run: yarn zip-module
+      - name: Create Release
+        id: create-release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: false
+          prerelease: false
+          token: ${{secrets.GITHUB_TOKEN}}
+          generateReleaseNotes: true
+          artifacts: ./module.zip, ./module.json

@@ -1,7 +1,11 @@
 node_modules
 .vscode
-packs
 
-#playwright
+# output
+dist
+module.zip
+
+#tests
 /tests/testData
 test-results
+.coverage
