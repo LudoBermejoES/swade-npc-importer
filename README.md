@@ -82,6 +82,11 @@ Some _Prototype Token_ options may be set by default
 - **Edges**
   - Initiative Edges are checked in the _tweaks_ sections of the Actor
 - **Powers** & **Power Points**
+- **Super Powers** (Super Powers Companion)
+  - Full support for `swade-supers-companion.superPower` item type
+  - Automatic compendium lookup with fallback to ability items
+  - Preserves trappings (e.g., "Attack (Ranged, Electricity)")
+  - Requires Super Powers Companion packs enabled in settings
 - **Pace**
 - **Parry**
 - **Toughness**
@@ -148,6 +153,40 @@ Some _Prototype Token_ options may be set by default
         @h Weakness(dirt): Some Monster hate being dirty
         @sa SpecialAbs: this is a ver special Abilitiy
         ```
+
+### Super Powers Support
+
+The importer now has **full support** for the Super Powers Companion! When importing superhero stat blocks, use the following format:
+
+```
+Captain Thunder
+A mighty superhero with control over electricity and storm.
+Protector of Metro City since the 1940s.
+
+Attributes: Agility d8, Smarts d8, Spirit d10, Strength d12+2, Vigor d10
+Skills: Athletics d10, Fighting d10, Flying d8, Focus d10, Intimidation d8, Notice d8
+Pace: 6; Parry: 7; Toughness: 12 (3)
+Edges: Ambidextrous, Combat Reflexes, Level Headed, Super Powers
+Super Powers: Attack (Ranged, Electricity), Flight, Super Attribute (Strength), Toughness
+Power Points: 30
+Gear: Costume (+3 Armor, bulletproof)
+Special Abilities:
+@sa Electrical Immunity: Immune to electrical damage
+@sa Storm Control: Can create weather effects within 1 mile
+```
+
+**Key Features:**
+
+- **Super Powers Section**: Comma-separated list of powers from Super Powers Companion
+- **Focus Skill**: Essential for controlling super powers (linked to Spirit)
+- **Trappings Support**: Preserves modifiers like "Attack (Ranged, Electricity)"
+- **Item Creation**: Creates proper Super Power items when found in compendiums
+- **Fallback**: Creates Ability items for unknown or custom powers
+
+**Requirements:**
+
+- Enable Super Powers Companion packs in NPC Importer settings
+- Recommended pack: `swade-supers-companion.superpowers`
 
 ---
 
