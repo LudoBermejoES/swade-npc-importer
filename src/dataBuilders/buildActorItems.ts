@@ -5,12 +5,13 @@ import { ParsedActor } from '../types/importedActor';
 import { checkBruteEdge } from './buildActorDataHelpers';
 
 export async function buildActorItems(parsedData: ParsedActor) {
-  const [skills, edges, hindrances, powers, specialAbilities, gear] =
+  const [skills, edges, hindrances, powers, superPowers, specialAbilities, gear] =
     await Promise.all([
       itemBuilder.skillBuilder(parsedData.skills ?? {}),
       itemBuilder.edgeBuilder(parsedData.edges ?? []),
       itemBuilder.hindranceBuilder(parsedData.hindrances ?? []),
       itemBuilder.powerBuilder(parsedData.powers ?? []),
+      itemBuilder.superPowerBuilder(parsedData.superPowers ?? {}),
       specialAbilitiesParser(parsedData.specialAbilities),
       itemGearBuilder(parsedData.gear ?? {}),
     ]);
@@ -20,6 +21,7 @@ export async function buildActorItems(parsedData: ParsedActor) {
     ...(edges ?? []),
     ...(hindrances ?? []),
     ...(powers ?? []),
+    ...(superPowers ?? []),
     ...(specialAbilities ?? []),
     ...(gear ?? []),
   ];

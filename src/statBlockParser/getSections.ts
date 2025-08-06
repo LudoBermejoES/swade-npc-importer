@@ -37,12 +37,37 @@ function getSectionsIndex(inputData: string): number[] {
   ];
 
   const allStats = allStatBlockEntities.concat(getActorAddtionalStatsArray());
-  const sectionsIndex: number[] = [];
+  const foundMatches: { index: number; pattern: string }[] = [];
+  
   allStats.forEach(element => {
-    const index = inputData.search(new RegExp(element, 'i'));
+    const regex = new RegExp(element.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const index = inputData.search(regex);
     if (index >= 0) {
-      sectionsIndex.push(index);
+      foundMatches.push({ index, pattern: element });
     }
   });
+  
+  // Sort by pattern length (longest first) to prioritize longer matches over shorter ones
+  foundMatches.sort((a, b) => b.pattern.length - a.pattern.length);
+  
+  const sectionsIndex: number[] = [];
+  const usedRanges: { start: number; end: number }[] = [];
+  
+  foundMatches.forEach(match => {
+    const matchEnd = match.index + match.pattern.length;
+    
+    // Check if this match overlaps with any already accepted match
+    const overlaps = usedRanges.some(range => 
+      (match.index >= range.start && match.index < range.end) ||
+      (matchEnd > range.start && matchEnd <= range.end) ||
+      (match.index <= range.start && matchEnd >= range.end)
+    );
+    
+    if (!overlaps) {
+      sectionsIndex.push(match.index);
+      usedRanges.push({ start: match.index, end: matchEnd });
+    }
+  });
+  
   return sectionsIndex.sort((a, b) => a - b);
 }

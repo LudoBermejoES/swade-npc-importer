@@ -24,7 +24,7 @@ vi.mock('../../src/dataBuilders/itemBuilderHelpers', async () => {
       effects: { toJSON: () => ['fx'] },
       flags: { flag: true },
     })),
-    generateDescription: vi.fn((desc, item) => desc || 'desc'),
+    generateDescription: vi.fn((desc, _item) => desc || 'desc'),
     checkEquipedStatus: vi.fn(() => 4),
   };
 });
@@ -133,6 +133,137 @@ describe('itemBuilders', () => {
     const result = await itemBuilders.powerBuilder(['Bolt']);
     expect(result[0].type).toBe(ItemType.POWER);
     expect(result[0].name).toBe('Bolt');
+  });
+
+  describe('superPowerBuilder', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('returns empty array if superPowers is falsy', async () => {
+      expect(await itemBuilders.superPowerBuilder(undefined as any)).toEqual([]);
+      expect(await itemBuilders.superPowerBuilder(null as any)).toEqual([]);
+      expect(await itemBuilders.superPowerBuilder({})).toEqual([]);
+    });
+
+    it('builds super power items when found in compendium', async () => {
+      // Mock getItemFromCompendium to return a super power item
+      vi.mocked(foundryActions.getItemFromCompendium).mockResolvedValue({
+        name: 'Flight',
+        type: ItemType.SUPERPOWER,
+        system: { description: 'Allows flight', notes: 'Super power' },
+        img: 'modules/swade-supers-companion/assets/icons/super-power.webp',
+      });
+
+      const superPowers = { 'Flight': 'Allows the character to fly' };
+      const result = await itemBuilders.superPowerBuilder(superPowers);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe(ItemType.SUPERPOWER);
+      expect(result[0].name).toBe('Flight');
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Flight', ItemType.SUPERPOWER);
+    });
+
+    it('falls back to ability items when super power not found in compendium', async () => {
+      // Mock getItemFromCompendium to return empty/null for super power lookup
+      vi.mocked(foundryActions.getItemFromCompendium).mockResolvedValue(null);
+
+      const superPowers = { 'Custom Power': 'A custom super power' };
+      const result = await itemBuilders.superPowerBuilder(superPowers);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe(ItemType.ABILITY);
+      expect(result[0].name).toBe('Custom Power');
+      expect(result[0].system.description).toBe('A custom super power');
+    });
+
+    it('handles super powers with trappings in parentheses', async () => {
+      // Mock getItemFromCompendium to return a super power item
+      vi.mocked(foundryActions.getItemFromCompendium).mockResolvedValue({
+        name: 'Attack',
+        type: ItemType.SUPERPOWER,
+        system: { description: 'Ranged attack power', notes: '' },
+      });
+
+      const superPowers = { 'Attack (Ranged, Electricity)': 'Electrical ranged attack' };
+      const result = await itemBuilders.superPowerBuilder(superPowers);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe(ItemType.SUPERPOWER);
+      expect(result[0].name).toBe('Attack (Ranged, Electricity)');
+      expect(result[0].system.trapping).toBe('Ranged, Electricity');
+      // Should search for clean name without trapping
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Attack', ItemType.SUPERPOWER);
+    });
+
+    it('handles multiple super powers correctly', async () => {
+      // Mock different responses for different powers
+      vi.mocked(foundryActions.getItemFromCompendium)
+        .mockResolvedValueOnce({
+          name: 'Flight',
+          type: ItemType.SUPERPOWER,
+          system: { description: 'Flight power' },
+        })
+        .mockResolvedValueOnce(null) // First call for Custom Power fails
+        .mockResolvedValueOnce(null); // Second call with slash replacement also fails
+
+      const superPowers = {
+        'Flight': 'Allows flight',
+        'Custom Power': 'A custom ability'
+      };
+      const result = await itemBuilders.superPowerBuilder(superPowers);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].type).toBe(ItemType.SUPERPOWER);
+      expect(result[0].name).toBe('Flight');
+      expect(result[1].type).toBe(ItemType.ABILITY);
+      expect(result[1].name).toBe('Custom Power');
+    });
+
+    it('handles super powers with slash replacements', async () => {
+      // Mock first call to fail, second call with replaced slashes to succeed
+      vi.mocked(foundryActions.getItemFromCompendium)
+        .mockResolvedValueOnce(null) // First call fails
+        .mockResolvedValueOnce({
+          name: 'Super Attribute',
+          type: ItemType.SUPERPOWER,
+          system: { description: 'Enhanced attribute' },
+        });
+
+      const superPowers = { 'Super/Attribute': 'Enhanced attribute power' };
+      const result = await itemBuilders.superPowerBuilder(superPowers);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe(ItemType.SUPERPOWER);
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Super/Attribute', ItemType.SUPERPOWER);
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Super / Attribute', ItemType.SUPERPOWER);
+    });
+
+    it('filters out null results when power building fails', async () => {
+      // Mock getItemFromCompendium to return a valid super power
+      vi.mocked(foundryActions.getItemFromCompendium).mockResolvedValue({
+        name: 'Flight',
+        type: ItemType.SUPERPOWER,
+        system: { description: 'Flight power' },
+      });
+
+      // Mock Logger.error to avoid test output noise
+      const loggerSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Mock buildItemObject to throw for testing error handling
+      const buildItemObjectSpy = vi.spyOn(itemBuilderHelpers, 'buildItemObject').mockImplementation(() => {
+        throw new Error('Build failed');
+      });
+
+      const superPowers = { 'Flight': 'Flight power' };
+      const result = await itemBuilders.superPowerBuilder(superPowers);
+
+      expect(result).toHaveLength(0); // Filtered out the failed build
+      
+      // Restore mocks
+      if (loggerSpy.mockRestore) loggerSpy.mockRestore();
+      if (buildItemObjectSpy.mockRestore) buildItemObjectSpy.mockRestore();
+    });
   });
 
   describe('skillBuilder', () => {

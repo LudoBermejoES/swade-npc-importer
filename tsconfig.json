@@ -13,6 +13,6 @@
     "strict": false,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "rollup.config.ts"],
+  "include": ["src/**/*", "tests/**/*", "rollup.config.ts"],
   "exclude": ["bin"]
 }

@@ -341,3 +341,58 @@ export async function powerBuilder(powers: string[]): Promise<any[]> {
   );
   return allPowers.filter(Boolean);
 }
+
+export async function superPowerBuilder(
+  superPowers: Record<string, string>,
+): Promise<any[]> {
+  if (!superPowers || Object.keys(superPowers).length === 0) return [];
+  const allSuperPowers = await Promise.all(
+    Object.entries(superPowers).map(async ([superPowerName, description]) => {
+      let cleanName = superPowerName.trim();
+      const powerTrapping = superPowerName.match(/\(([^)]+)\)/);
+      if (powerTrapping) {
+        cleanName = superPowerName.replace(powerTrapping[0], '').trim();
+      }
+      let item = await getItemFromCompendium(cleanName, ItemType.SUPERPOWER);
+      if (!item || isEmpty(item.system)) {
+        item = await getItemFromCompendium(
+          cleanName.replace('/', ' / '),
+          ItemType.SUPERPOWER,
+        );
+      }
+      let system = item?.system ? structuredClone(item.system) : {};
+      if (powerTrapping) {
+        system.trapping = powerTrapping[1];
+      }
+      // If we found a super power item, use it; otherwise create a basic ability item
+      const itemType =
+        item && !isEmpty(item.system) ? ItemType.SUPERPOWER : ItemType.ABILITY;
+      const itemImg =
+        itemType === ItemType.SUPERPOWER
+          ? 'modules/swade-supers-companion/assets/icons/super-power.webp'
+          : 'systems/swade/assets/icons/power.svg';
+
+      try {
+        return buildItemObject({
+          item,
+          type: itemType,
+          name: `${item?.system?.parent?.name ?? item?.name ?? cleanName} ${
+            powerTrapping ? powerTrapping[0] : ''
+          }`.trim(),
+          img: itemImg,
+          system:
+            itemType === ItemType.SUPERPOWER
+              ? system
+              : {
+                  description: description || '',
+                  notes: '',
+                },
+        });
+      } catch (error) {
+        Logger.error(`Could not build super power: ${error}`);
+        return null;
+      }
+    }),
+  );
+  return allSuperPowers.filter(Boolean);
+}

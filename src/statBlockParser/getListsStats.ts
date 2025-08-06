@@ -6,7 +6,14 @@ import { newLineRegex } from '../global';
  */
 export function getListStat(sections: string[], labelKey: ListType): string[] {
   const label = `${foundryI18nLocalize(`npcImporter.parser.${labelKey}`) || labelKey}:`;
-  const line = sections.find(x => x.startsWith(label));
+  // Special handling for Powers to avoid matching "Super Powers:"
+  if (labelKey === ListType.Powers) {
+    const superPowersLabel = `${foundryI18nLocalize('npcImporter.parser.SuperPowers') || 'Super Powers'}:`;
+    const line = sections.find(x => x.startsWith(label) && !x.startsWith(superPowersLabel));
+    return line ? handleSpecialCharacters(line) : [];
+  }
+  // Use exact match at the start of line for other types
+  const line = sections.find(x => x.startsWith(label) && (x === label || x.charAt(label.length) === ' '));
   return line ? handleSpecialCharacters(line) : [];
 }
 

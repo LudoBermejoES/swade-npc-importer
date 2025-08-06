@@ -4,6 +4,7 @@ export enum ItemType {
   HINDRANCE = 'hindrance',
   ABILITY = 'ability',
   POWER = 'power',
+  SUPERPOWER = 'swade-supers-companion.superPower',
   WEAPON = 'weapon',
   SHIELD = 'shield',
   ARMOR = 'armor',

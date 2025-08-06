@@ -154,4 +154,31 @@ describe('statBlockParser integration', () => {
     await expect(statBlockParser('bad input')).rejects.toThrow(expectedError);
     expect(foundryUiErrorSpy).toHaveBeenCalledWith(expectedError);
   });
+
+  it('parses Super Powers section correctly', async () => {
+    const superHeroStatBlock = `
+Captain Thunder
+A mighty superhero with control over electricity and storm.
+
+Attributes: Agility d8, Smarts d8, Spirit d10, Strength d12+2, Vigor d10
+Skills: Athletics d10, Fighting d10, Flying d8, Notice d8
+Pace: 6; Parry: 7; Toughness: 12 (3)
+Edges: Combat Reflexes, Level Headed
+Super Powers: Flight, Super Attribute (Strength), Toughness, Attack (Ranged, Electricity)
+Power Points: 30
+Gear: Costume (+3 Armor)
+`;
+
+    const result = await statBlockParser(superHeroStatBlock);
+    
+    expect(result.name).toBe('Captain Thunder');
+    expect(result.superPowers).toEqual({
+      'Flight': '',
+      'Super Attribute (Strength)': '',
+      'Toughness': '',
+      'Attack (Ranged, Electricity)': ''
+    });
+    expect(result.edges).toEqual(['Combat Reflexes', 'Level Headed']);
+    expect(result.powerPoints).toBe(30);
+  });
 });
