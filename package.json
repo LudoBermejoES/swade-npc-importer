@@ -52,5 +52,8 @@
   "lint-staged": {
     "*.ts": "eslint --cache --fix",
     "*.{js,css,md}": "prettier --write"
+  },
+  "dependencies": {
+    "yarn": "^1.22.22"
   }
 }
