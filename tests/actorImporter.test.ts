@@ -68,4 +68,99 @@ describe('actorImporter', () => {
     await actorImporter(actorData);
     expect(global.foundry.applications.api.DialogV2).toHaveBeenCalled();
   });
+
+  describe('multiple characters', () => {
+    it('should import multiple characters when name contains "|"', async () => {
+      mockGetActorId.mockReturnValue(undefined);
+      const actorData = {
+        name: 'Actor One | Actor Two | Actor Three',
+        type: 'npc',
+        system: {},
+        items: [],
+      } as SwadeActorToImport;
+
+      await actorImporter(actorData);
+
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        'Importing multiple characters: Actor One, Actor Two, Actor Three',
+      );
+      expect(mockImport).toHaveBeenCalledTimes(3);
+      expect(mockImport).toHaveBeenCalledWith({
+        ...actorData,
+        name: 'Actor One',
+      });
+      expect(mockImport).toHaveBeenCalledWith({
+        ...actorData,
+        name: 'Actor Two',
+      });
+      expect(mockImport).toHaveBeenCalledWith({
+        ...actorData,
+        name: 'Actor Three',
+      });
+    });
+
+    it('should handle multiple characters with existing actors', async () => {
+      mockGetActorId
+        .mockReturnValueOnce(undefined) // Actor One doesn't exist
+        .mockReturnValueOnce('existing-id-2') // Actor Two exists
+        .mockReturnValueOnce(undefined); // Actor Three doesn't exist
+
+      const actorData = {
+        name: 'Actor One | Actor Two | Actor Three',
+        type: 'npc',
+      } as SwadeActorToImport;
+
+      await actorImporter(actorData);
+
+      expect(mockImport).toHaveBeenCalledTimes(2); // Only non-existing actors
+      expect(mockImport).toHaveBeenCalledWith({
+        ...actorData,
+        name: 'Actor One',
+      });
+      expect(mockImport).toHaveBeenCalledWith({
+        ...actorData,
+        name: 'Actor Three',
+      });
+      expect(global.foundry.applications.api.DialogV2).toHaveBeenCalledTimes(1); // Dialog for existing actor
+    });
+
+    it('should filter out empty names after splitting', async () => {
+      mockGetActorId.mockReturnValue(undefined);
+      const actorData = {
+        name: 'Actor One | | Actor Two |   | Actor Three',
+        type: 'npc',
+      } as SwadeActorToImport;
+
+      await actorImporter(actorData);
+
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        'Importing multiple characters: Actor One, Actor Two, Actor Three',
+      );
+      expect(mockImport).toHaveBeenCalledTimes(3);
+    });
+
+    it('should warn if no valid names found after splitting', async () => {
+      const actorData = {
+        name: ' | | |   |',
+        type: 'npc',
+      } as SwadeActorToImport;
+
+      await actorImporter(actorData);
+
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        'actorImporter: No valid names found after splitting.',
+      );
+      expect(mockImport).not.toHaveBeenCalled();
+    });
+
+    it('should handle single character normally (no "|" character)', async () => {
+      mockGetActorId.mockReturnValue(undefined);
+      const actorData = { name: 'Single Actor' } as SwadeActorToImport;
+
+      await actorImporter(actorData);
+
+      expect(mockImport).toHaveBeenCalledTimes(1);
+      expect(mockImport).toHaveBeenCalledWith(actorData);
+    });
+  });
 });

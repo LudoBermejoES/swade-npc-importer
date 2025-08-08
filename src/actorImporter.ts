@@ -10,11 +10,46 @@ export async function actorImporter(
     Logger.warn('actorImporter: Missing actor name.');
     return;
   }
+
+  // Check if the name contains "|" for multiple characters
+  if (actorDataToImport.name.includes('|')) {
+    await importMultipleActors(actorDataToImport);
+    return;
+  }
+
   let actorId = getActorId(actorDataToImport.name);
   if (!actorId) {
     await safeImport(actorDataToImport);
   } else {
     await whatToDo(actorDataToImport, actorId);
+  }
+}
+
+async function importMultipleActors(
+  actorDataToImport: SwadeActorToImport,
+): Promise<void> {
+  const names = actorDataToImport.name
+    .split('|')
+    .map(name => name.trim())
+    .filter(name => name.length > 0);
+
+  if (names.length === 0) {
+    Logger.warn('actorImporter: No valid names found after splitting.');
+    return;
+  }
+
+  Logger.info(`Importing multiple characters: ${names.join(', ')}`);
+
+  for (const name of names) {
+    // Create a copy of the actor data with the individual name
+    const individualActorData = { ...actorDataToImport, name };
+
+    let actorId = getActorId(name);
+    if (!actorId) {
+      await safeImport(individualActorData);
+    } else {
+      await whatToDo(individualActorData, actorId);
+    }
   }
 }
 
