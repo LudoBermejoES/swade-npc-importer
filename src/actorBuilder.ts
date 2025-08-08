@@ -48,8 +48,14 @@ export async function buildActor(
     return;
   }
 
+  // Check if the text contains "---" to split multiple characters
+  if (rawStatBlock.includes('---')) {
+    await buildMultipleActors(importSettings, rawStatBlock);
+    return;
+  }
+
   await setAllPacks();
-  const currentLang = game.i18n?.lang ?? 'en';
+  const currentLang = (game.i18n as any)?.lang ?? 'en';
   await setParsingLanguage(getModuleSettings(settingParseLanguage));
   await updateModuleSetting(settingLastSaveFolder, importSettings.saveFolder);
 
@@ -67,6 +73,56 @@ export async function buildActor(
       foundryI18nLocalize('npcImporter.parser.BuildActorError') +
         (error?.message ? `: ${error.message}` : ''),
     );
+  } finally {
+    await setParsingLanguage(currentLang);
+    await resetAllPacks();
+  }
+}
+
+async function buildMultipleActors(
+  importSettings: ImportSettings,
+  rawStatBlock: string,
+): Promise<void> {
+  const characterBlocks = rawStatBlock
+    .split('---')
+    .map(block => block.trim())
+    .filter(block => block.length > 0);
+
+  if (characterBlocks.length === 0) {
+    foundryUiError(foundryI18nLocalize('npcImporter.parser.EmptyClipboard'));
+    return;
+  }
+
+  Logger.info(
+    `Processing ${characterBlocks.length} characters from text input`,
+  );
+
+  await setAllPacks();
+  const currentLang = (game.i18n as any)?.lang ?? 'en';
+  await setParsingLanguage(getModuleSettings(settingParseLanguage));
+  await updateModuleSetting(settingLastSaveFolder, importSettings.saveFolder);
+
+  try {
+    for (const characterBlock of characterBlocks) {
+      try {
+        const parsedActor = await statBlockParser(characterBlock);
+        const finalActor = await generateSwadeActorData(
+          parsedActor,
+          importSettings,
+        );
+        logActorSummary(finalActor);
+        await actorImporter(finalActor);
+      } catch (error: any) {
+        Logger.error('Failed to build character from block:', error);
+        Logger.error('Character block content:', characterBlock);
+        // Continue with other characters instead of stopping completely
+        foundryUiError(
+          foundryI18nLocalize('npcImporter.parser.BuildActorError') +
+            (error?.message ? `: ${error.message}` : '') +
+            ' (continuing with remaining characters)',
+        );
+      }
+    }
   } finally {
     await setParsingLanguage(currentLang);
     await resetAllPacks();
