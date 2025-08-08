@@ -42,7 +42,9 @@ describe('buildActorItems', () => {
     vi.mocked(itemBuilders.edgeBuilder).mockResolvedValue(mockEdges);
     vi.mocked(itemBuilders.hindranceBuilder).mockResolvedValue(mockHindrances);
     vi.mocked(itemBuilders.powerBuilder).mockResolvedValue(mockPowers);
-    vi.mocked(itemBuilders.superPowerBuilder).mockResolvedValue(mockSuperPowers);
+    vi.mocked(itemBuilders.superPowerBuilder).mockResolvedValue(
+      mockSuperPowers,
+    );
     vi.mocked(specialAbilitiesParser).mockResolvedValue(mockSpecialAbilities);
     vi.mocked(itemGearBuilder).mockResolvedValue(mockGear);
 
@@ -52,9 +54,9 @@ describe('buildActorItems', () => {
       edges: ['Combat Reflexes'],
       hindrances: ['Arrogant'],
       powers: ['Bolt'],
-      superPowers: { 'Flight': 'Allows flight' },
-      specialAbilities: { 'Fear': 'Causes fear' },
-      gear: { 'Sword': { damage: 'Str+d8' } },
+      superPowers: { Flight: 'Allows flight' },
+      specialAbilities: { Fear: 'Causes fear' },
+      gear: { Sword: { damage: 'Str+d8' } },
       attributes: {
         agility: { die: { sides: 8, modifier: 0 } },
         smarts: { die: { sides: 6, modifier: 0 }, animal: false },
@@ -69,10 +71,16 @@ describe('buildActorItems', () => {
     // Verify all builders were called with correct data
     expect(itemBuilders.skillBuilder).toHaveBeenCalledWith(parsedData.skills);
     expect(itemBuilders.edgeBuilder).toHaveBeenCalledWith(parsedData.edges);
-    expect(itemBuilders.hindranceBuilder).toHaveBeenCalledWith(parsedData.hindrances);
+    expect(itemBuilders.hindranceBuilder).toHaveBeenCalledWith(
+      parsedData.hindrances,
+    );
     expect(itemBuilders.powerBuilder).toHaveBeenCalledWith(parsedData.powers);
-    expect(itemBuilders.superPowerBuilder).toHaveBeenCalledWith(parsedData.superPowers);
-    expect(specialAbilitiesParser).toHaveBeenCalledWith(parsedData.specialAbilities);
+    expect(itemBuilders.superPowerBuilder).toHaveBeenCalledWith(
+      parsedData.superPowers,
+    );
+    expect(specialAbilitiesParser).toHaveBeenCalledWith(
+      parsedData.specialAbilities,
+    );
     expect(itemGearBuilder).toHaveBeenCalledWith(parsedData.gear);
 
     // Verify all items are included in the result
@@ -146,22 +154,28 @@ describe('buildActorItems', () => {
   it('includes superPowers in the correct position in items array', async () => {
     // Mock return values to verify order
     const mockPowers = [{ name: 'Bolt', type: ItemType.POWER, order: 'power' }];
-    const mockSuperPowers = [{ name: 'Flight', type: ItemType.SUPERPOWER, order: 'superpower' }];
-    const mockSpecialAbilities = [{ name: 'Fear', type: ItemType.ABILITY, order: 'ability' }];
+    const mockSuperPowers = [
+      { name: 'Flight', type: ItemType.SUPERPOWER, order: 'superpower' },
+    ];
+    const mockSpecialAbilities = [
+      { name: 'Fear', type: ItemType.ABILITY, order: 'ability' },
+    ];
 
     vi.mocked(itemBuilders.skillBuilder).mockResolvedValue([]);
     vi.mocked(itemBuilders.edgeBuilder).mockResolvedValue([]);
     vi.mocked(itemBuilders.hindranceBuilder).mockResolvedValue([]);
     vi.mocked(itemBuilders.powerBuilder).mockResolvedValue(mockPowers);
-    vi.mocked(itemBuilders.superPowerBuilder).mockResolvedValue(mockSuperPowers);
+    vi.mocked(itemBuilders.superPowerBuilder).mockResolvedValue(
+      mockSuperPowers,
+    );
     vi.mocked(specialAbilitiesParser).mockResolvedValue(mockSpecialAbilities);
     vi.mocked(itemGearBuilder).mockResolvedValue([]);
 
     const parsedData: ParsedActor = {
       name: 'Test Hero',
       powers: ['Bolt'],
-      superPowers: { 'Flight': 'Allows flight' },
-      specialAbilities: { 'Fear': 'Causes fear' },
+      superPowers: { Flight: 'Allows flight' },
+      specialAbilities: { Fear: 'Causes fear' },
       attributes: {
         agility: { die: { sides: 8, modifier: 0 } },
         smarts: { die: { sides: 6, modifier: 0 }, animal: false },

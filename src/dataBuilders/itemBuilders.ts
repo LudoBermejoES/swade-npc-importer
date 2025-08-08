@@ -29,7 +29,7 @@ export async function skillBuilder(
         return {
           ...(item ?? {}),
           type: ItemType.SKILL,
-          name: capitalizeEveryWord(item.name || skillName),
+          name: capitalizeEveryWord(item?.name || skillName),
           img: item?.img ?? 'systems/swade/assets/icons/skill.svg',
           system: {
             ...(item?.system ?? {}),
@@ -73,7 +73,7 @@ export async function weaponBuilder(props: WeaponBuilderProps): Promise<any> {
     return buildItemObject({
       item,
       type: ItemType.WEAPON,
-      name: item?.name ?? capitalizeEveryWord(item.name || props.weaponName),
+      name: item?.name ?? capitalizeEveryWord(item?.name || props.weaponName),
       img: 'systems/swade/assets/icons/weapon.svg',
       system: {
         description: generateDescription(props.weaponDescription || '', item),
@@ -105,7 +105,7 @@ export async function shieldBuilder(
     return buildItemObject({
       item,
       type: ItemType.SHIELD,
-      name: item?.name ?? capitalizeEveryWord(item.name || shieldName),
+      name: item?.name ?? capitalizeEveryWord(item?.name || shieldName),
       img: 'systems/swade/assets/icons/shield.svg',
       system: {
         description: generateDescription(description, item),
@@ -134,7 +134,7 @@ export async function armorBuilder(
     return buildItemObject({
       item,
       type: ItemType.ARMOR,
-      name: item?.name ?? capitalizeEveryWord(item.name ||armorName),
+      name: item?.name ?? capitalizeEveryWord(item?.name || armorName),
       img: 'systems/swade/assets/icons/armor.svg',
       system: {
         description: generateDescription(armorDescription, item),
@@ -161,7 +161,7 @@ export async function gearBuilder(
     return buildItemObject({
       item,
       type: ItemType.GEAR,
-      name: item?.name ?? capitalizeEveryWord(item.name || gearName),
+      name: item?.name ?? capitalizeEveryWord(item?.name || gearName),
       img: 'systems/swade/assets/icons/gear.svg',
       system: {
         description: generateDescription(description, item),
@@ -187,7 +187,7 @@ export async function abilityBuilder(
     return buildItemObject({
       item,
       type: ItemType.ABILITY,
-      name: capitalizeEveryWord(item.name || abilityName),
+      name: capitalizeEveryWord(item?.name || abilityName),
       img: 'systems/swade/assets/icons/ability.svg',
       system: {
         description: generateDescription(abilityDescription, item, true),
@@ -238,7 +238,7 @@ export async function edgeBuilder(edges: string[]): Promise<any[]> {
         return buildItemObject({
           item,
           type: ItemType.EDGE,
-          name: capitalizeEveryWord(item.name || edgeName),
+          name: capitalizeEveryWord(item?.name || edgeName),
           img: 'systems/swade/assets/icons/edge.svg',
           system: {
             description: item?.system?.description ?? '',
@@ -285,7 +285,7 @@ export async function hindranceBuilder(hindrances: string[]): Promise<any[]> {
         return buildItemObject({
           item,
           type: ItemType.HINDRANCE,
-          name: capitalizeEveryWord(item.name ?? hindranceName),
+          name: capitalizeEveryWord(item?.name ?? hindranceName),
           img: 'systems/swade/assets/icons/hindrance.svg',
           system: {
             description: item?.system?.description ?? '',

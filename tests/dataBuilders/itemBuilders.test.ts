@@ -141,7 +141,9 @@ describe('itemBuilders', () => {
     });
 
     it('returns empty array if superPowers is falsy', async () => {
-      expect(await itemBuilders.superPowerBuilder(undefined as any)).toEqual([]);
+      expect(await itemBuilders.superPowerBuilder(undefined as any)).toEqual(
+        [],
+      );
       expect(await itemBuilders.superPowerBuilder(null as any)).toEqual([]);
       expect(await itemBuilders.superPowerBuilder({})).toEqual([]);
     });
@@ -155,13 +157,16 @@ describe('itemBuilders', () => {
         img: 'modules/swade-supers-companion/assets/icons/super-power.webp',
       });
 
-      const superPowers = { 'Flight': 'Allows the character to fly' };
+      const superPowers = { Flight: 'Allows the character to fly' };
       const result = await itemBuilders.superPowerBuilder(superPowers);
 
       expect(result).toHaveLength(1);
       expect(result[0].type).toBe(ItemType.SUPERPOWER);
       expect(result[0].name).toBe('Flight');
-      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Flight', ItemType.SUPERPOWER);
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith(
+        'Flight',
+        ItemType.SUPERPOWER,
+      );
     });
 
     it('falls back to ability items when super power not found in compendium', async () => {
@@ -185,7 +190,9 @@ describe('itemBuilders', () => {
         system: { description: 'Ranged attack power', notes: '' },
       });
 
-      const superPowers = { 'Attack (Ranged, Electricity)': 'Electrical ranged attack' };
+      const superPowers = {
+        'Attack (Ranged, Electricity)': 'Electrical ranged attack',
+      };
       const result = await itemBuilders.superPowerBuilder(superPowers);
 
       expect(result).toHaveLength(1);
@@ -193,7 +200,10 @@ describe('itemBuilders', () => {
       expect(result[0].name).toBe('Attack (Ranged, Electricity)');
       expect(result[0].system.trapping).toBe('Ranged, Electricity');
       // Should search for clean name without trapping
-      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Attack', ItemType.SUPERPOWER);
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith(
+        'Attack',
+        ItemType.SUPERPOWER,
+      );
     });
 
     it('handles multiple super powers correctly', async () => {
@@ -208,8 +218,8 @@ describe('itemBuilders', () => {
         .mockResolvedValueOnce(null); // Second call with slash replacement also fails
 
       const superPowers = {
-        'Flight': 'Allows flight',
-        'Custom Power': 'A custom ability'
+        Flight: 'Allows flight',
+        'Custom Power': 'A custom ability',
       };
       const result = await itemBuilders.superPowerBuilder(superPowers);
 
@@ -235,8 +245,14 @@ describe('itemBuilders', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].type).toBe(ItemType.SUPERPOWER);
-      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Super/Attribute', ItemType.SUPERPOWER);
-      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith('Super / Attribute', ItemType.SUPERPOWER);
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith(
+        'Super/Attribute',
+        ItemType.SUPERPOWER,
+      );
+      expect(foundryActions.getItemFromCompendium).toHaveBeenCalledWith(
+        'Super / Attribute',
+        ItemType.SUPERPOWER,
+      );
     });
 
     it('filters out null results when power building fails', async () => {
@@ -251,15 +267,17 @@ describe('itemBuilders', () => {
       const loggerSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Mock buildItemObject to throw for testing error handling
-      const buildItemObjectSpy = vi.spyOn(itemBuilderHelpers, 'buildItemObject').mockImplementation(() => {
-        throw new Error('Build failed');
-      });
+      const buildItemObjectSpy = vi
+        .spyOn(itemBuilderHelpers, 'buildItemObject')
+        .mockImplementation(() => {
+          throw new Error('Build failed');
+        });
 
-      const superPowers = { 'Flight': 'Flight power' };
+      const superPowers = { Flight: 'Flight power' };
       const result = await itemBuilders.superPowerBuilder(superPowers);
 
       expect(result).toHaveLength(0); // Filtered out the failed build
-      
+
       // Restore mocks
       if (loggerSpy.mockRestore) loggerSpy.mockRestore();
       if (buildItemObjectSpy.mockRestore) buildItemObjectSpy.mockRestore();

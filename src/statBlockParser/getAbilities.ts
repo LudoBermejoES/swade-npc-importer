@@ -13,19 +13,15 @@ export function getAbilityList(
 ): Record<string, string> {
   const label = `${foundryI18nLocalize(`npcImporter.parser.${abilityType}`)}:`;
   // Use exact match at the start of line to avoid conflicts (e.g., "Powers:" matching "Super Powers:")
-  const abilityLine = sections.find(x => 
-    x.startsWith(label) && (x === label || x.charAt(label.length) === ' ')
+  const abilityLine = sections.find(
+    x => x.startsWith(label) && (x === label || x.charAt(label.length) === ' '),
   );
 
   if (!abilityLine) {
     return {};
   }
 
-  return getAbilities(
-    abilityLine
-      .replace(label, '')
-      .trim(),
-  );
+  return getAbilities(abilityLine.replace(label, '').trim());
 }
 
 function getAbilities(data: string): Record<string, string> {

@@ -9,11 +9,15 @@ export function getListStat(sections: string[], labelKey: ListType): string[] {
   // Special handling for Powers to avoid matching "Super Powers:"
   if (labelKey === ListType.Powers) {
     const superPowersLabel = `${foundryI18nLocalize('npcImporter.parser.SuperPowers') || 'Super Powers'}:`;
-    const line = sections.find(x => x.startsWith(label) && !x.startsWith(superPowersLabel));
+    const line = sections.find(
+      x => x.startsWith(label) && !x.startsWith(superPowersLabel),
+    );
     return line ? handleSpecialCharacters(line) : [];
   }
   // Use exact match at the start of line for other types
-  const line = sections.find(x => x.startsWith(label) && (x === label || x.charAt(label.length) === ' '));
+  const line = sections.find(
+    x => x.startsWith(label) && (x === label || x.charAt(label.length) === ' '),
+  );
   return line ? handleSpecialCharacters(line) : [];
 }
 

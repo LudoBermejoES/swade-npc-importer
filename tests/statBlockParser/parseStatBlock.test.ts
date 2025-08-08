@@ -170,13 +170,13 @@ Gear: Costume (+3 Armor)
 `;
 
     const result = await statBlockParser(superHeroStatBlock);
-    
+
     expect(result.name).toBe('Captain Thunder');
     expect(result.superPowers).toEqual({
-      'Flight': '',
+      Flight: '',
       'Super Attribute (Strength)': '',
-      'Toughness': '',
-      'Attack (Ranged, Electricity)': ''
+      Toughness: '',
+      'Attack (Ranged, Electricity)': '',
     });
     expect(result.edges).toEqual(['Combat Reflexes', 'Level Headed']);
     expect(result.powerPoints).toBe(30);
