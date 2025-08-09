@@ -4,6 +4,8 @@
 
 A Savage Worlds Adventure Edition stat block importer for [Foundry VTT](https://foundryvtt.com)
 
+**Current Version**: 0.5.0
+
 ---
 
 ### :exclamation: **Please Note**
@@ -47,6 +49,14 @@ The Importer basically searches for patterns in the text, so that means paying a
 
 4. In case an Actor with the same name already exists, then you have some options
    ![NPC Importer Dialogue](./readme_images/WhatToDoDialogue.png)
+
+### Multiple Characters Support ✨ _New in v0.5.0_
+
+The importer now supports importing multiple characters from a single statblock! Features include:
+
+- **Bulk Import**: Import several NPCs at once from a single paste operation
+- **Multiple Names**: Support for characters with multiple names separated by `|` (e.g., "John Smith | The Phantom")
+- **Batch Processing**: Efficiently processes multiple character entries in sequence
 
 ## Some configurations
 
@@ -154,9 +164,9 @@ Some _Prototype Token_ options may be set by default
         @sa SpecialAbs: this is a ver special Abilitiy
         ```
 
-### Super Powers Support
+### Super Powers Support ✨ _New in v0.5.0_
 
-The importer now has **full support** for the Super Powers Companion! When importing superhero stat blocks, use the following format:
+The importer now has **full support** for the Super Powers Companion! This major update includes comprehensive integration with the `swade-supers-companion.superPower` item type. When importing superhero stat blocks, use the following format:
 
 ```
 Captain Thunder
